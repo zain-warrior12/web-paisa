@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>FamPay Spin Game</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; background: #111; color: #fff; }
+    #spinBtn { padding: 10px 20px; margin: 20px; font-size: 18px; background: gold; border: none; border-radius: 10px; cursor: pointer; }
+    #paymentBtn, #gpayBtn { padding: 10px 20px; margin: 10px; font-size: 16px; background: #28a745; border: none; border-radius: 8px; cursor: pointer; color: white; }
+    #wheel { width: 200px; height: 200px; border: 10px solid #fff; border-radius: 50%; margin: 20px auto; position: relative; }
+    #pointer { width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-bottom: 30px solid red; margin: 10px auto; }
+  </style>
+</head>
+<body>
+
+  <h2>Login to Play Spin Game</h2>
+  <div id="g_id_onload"
+       data-client_id="105874237312-pfsbu1edr4buuut7oig4psfa1equhsek.apps.googleusercontent.com"
+       data-callback="onSignIn"></div>
+  <div class="g_id_signin" data-type="standard"></div>
+
+  <h3 id="welcome"></h3>
+  <h3>Balance: ₹<span id="balance">0</span></h3>
+
+  <div id="paymentSection" style="display:none;">
+    <p>Pay minimum ₹10 to start</p>
+    <button id="paymentBtn">Pay with FamPay</button>
+    <button id="gpayBtn">Pay with Google Pay</button>
+  </div>
+
+  <div id="gameSection" style="display:none;">
+    <div id="pointer"></div>
+    <div id="wheel"></div>
+    <button id="spinBtn">Spin (₹2)</button>
+  </div>
+
+  <script>
+    let balance = 0;
+    let loggedIn = false;
+
+    // Google Login Callback
+    function onSignIn(response) {
+      const user = jwt_decode(response.credential);
+      document.getElementById("welcome").innerText = "Welcome, " + user.name;
+      loggedIn = true;
+      document.getElementById("paymentSection").style.display = "block";
+    }
+
+    // FamPay button
+    document.getElementById("paymentBtn").onclick = function() {
+      window.location.href = "upi://pay?pa=9307934351@fam&pn=FamPay&am=10&cu=INR";
+    };
+
+    // Google Pay button
+    document.getElementById("gpayBtn").onclick = function() {
+      window.location.href = "upi://pay?pa=9307934351@fam&pn=FamPay&am=10&cu=INR";
+    };
+
+    // Dummy: Assume payment successful
+    function paymentSuccess() {
+      balance += 10;
+      document.getElementById("balance").innerText = balance;
+      document.getElementById("paymentSection").style.display = "none";
+      document.getElementById("gameSection").style.display = "block";
+    }
+
+    // Auto simulate payment after 5s
+    document.getElementById("paymentBtn").addEventListener("click", () => setTimeout(paymentSuccess, 5000));
+    document.getElementById("gpayBtn").addEventListener("click", () => setTimeout(paymentSuccess, 5000));
+
+    // Spin Button
+    document.getElementById("spinBtn").onclick = function() {
+      if (balance < 2) {
+        alert("Not enough balance!");
+        return;
+      }
+      balance -= 2;
+      document.getElementById("balance").innerText = balance;
+
+      let prize = [0, 2, 5, 10];
+      let win = prize[Math.floor(Math.random() * prize.length)];
+      setTimeout(() => {
+        balance += win;
+        alert("You won ₹" + win);
+        document.getElementById("balance").innerText = balance;
+      }, 2000);
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
+</body>
+</html>
